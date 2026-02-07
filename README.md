@@ -9,5 +9,11 @@
 4. Allows to **select the Speaker** (or the voice type) which will be used to render the resulting audio.</br>
 5. Allows to **stop the rendering process** with the **"Stop Render"** button.</br>
 
-**IMPORTANT NOTE**: This is a draft version of the TTS App, which can have bugs and performance issues!
+**IMPORTANT NOTE**: This is a draft version of the TTS App, which can have bugs and performance issues!</br>
+
+### Required tools:</br>
+1. Microsoft C++ Build Tools **(latest)**;</br>
+2. Coqui XTTSv2 ML model;</br>
+3. Python 3.11 **(not newer)**;</br>
+4. the list of other required libraries is shown inside the **"import"** section of the "app.py" file.</br>
 
