@@ -8,7 +8,7 @@
 import os
 import sys
 
-# --- [NEW] CUSTOM MODEL PATH SETUP ---
+# --- CUSTOM MODEL PATH SETUP ---
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
@@ -24,7 +24,7 @@ os.environ["TTS_HOME"] = MODELS_DIR          # For Coqui XTTS
 os.environ["HF_HOME"] = MODELS_DIR           # For Transformers (MMS/Qwen)
 os.environ["XDG_CACHE_HOME"] = MODELS_DIR    # Linux fallback
 
-# CRITICAL FIX: Disable typeguard source inspection for PyInstaller
+# Disable typeguard source inspection for PyInstaller
 os.environ["TYPEGUARD_DISABLE"] = "true"
 
 import types
@@ -124,7 +124,7 @@ LANGUAGES = {
     "English": "en",
     "Russian": "ru",
     "German": "de",
-    "Romanian": "ro",  # Now routed to MMS
+    "Romanian": "ro",  # Routed to MMS
     "French": "fr",
     "Spanish": "es",
     "Italian": "it",
@@ -264,7 +264,7 @@ class TextBlock(ctk.CTkFrame):
                                            width=120)
         self.lang_menu.pack(pady=5, anchor="w")
 
-        # [CHANGE] Enabled Undo functionality
+        # Enabled Undo functionality
         self.text_area = ctk.CTkTextbox(self.tab_view.tab("Write"), height=100, undo=True)
         self.text_area.pack(fill="both", expand=True)
 
@@ -431,13 +431,13 @@ class TextBlock(ctk.CTkFrame):
     def play_segment(self, start_time=0.0):
         if self.audio_data is not None:
             try:
-                # [FIX] Apply Volume Calculation Here (Digital Gain)
+                # Apply Volume Calculation Here (Digital Gain)
                 vol = self.vol_slider.get()
 
                 # Multiply data by volume (allows >1.0 amplification)
                 audio_vol = self.audio_data * vol
 
-                # [FIX] Soft Clip to prevent harsh distortion
+                # Soft Clip to prevent harsh distortion
                 audio_vol = np.clip(audio_vol, -1.0, 1.0)
 
                 # Convert to int16
@@ -634,7 +634,7 @@ class ChatAssistantPanel(ctk.CTkFrame):
         self.txt_input.delete(0, "end")
         self.add_message_bubble(user_text, is_user=True)
 
-        # --- [NEW] HELP COMMAND CHECK ---
+        # --- HELP COMMAND CHECK ---
         if user_text.lower() == "help":
             help_text = (
                 "🤖 **AI Assistant Commands:**\n\n"
@@ -681,14 +681,14 @@ class ChatAssistantPanel(ctk.CTkFrame):
         if not self.model: return
         self.generating = True
 
-        # [CHANGE] Gather Context from Blocks
+        # Gather Context from Blocks
         context_str = ""
         for i, block in enumerate(self.app.blocks):
             txt = block.text_area.get("1.0", "end").strip()
             if txt:
                 context_str += f"[BLOCK {block.index} CONTENT]: {txt}\n"
 
-        # [CHANGE] Improved Prompt
+        # Improved instruction prompt for the AI Assistant
         system_prompt = (
             "You are an intelligent assistant for a TTS app. "
             "You have access to the user's text blocks:\n"
@@ -713,7 +713,7 @@ class ChatAssistantPanel(ctk.CTkFrame):
         )
         model_inputs = self.tokenizer([text], return_tensors="pt").to(DEVICE)
 
-        # [CHANGE] Setup Streamer
+        # Setup Streamer
         streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
         generation_kwargs = dict(model_inputs, streamer=streamer, max_new_tokens=1024, temperature=0.7)
 
@@ -731,7 +731,7 @@ class ChatAssistantPanel(ctk.CTkFrame):
 
         accumulated_text = ""
 
-        # [CHANGE] Streaming Loop
+        # Streaming Loop
         for new_text in streamer:
             accumulated_text += new_text
 
@@ -751,7 +751,7 @@ class ChatAssistantPanel(ctk.CTkFrame):
 
             self.app.safe_update(update_text)
 
-        # [CHANGE] Process any block update commands found in the final text
+        # Process any block update commands found in the final text
         self.process_commands(accumulated_text)
         self.generating = False
 
@@ -879,7 +879,7 @@ class TTSApp(ctk.CTk):
 
         ctk.CTkLabel(self.sidebar, text="Max VRAM Usage:").pack(pady=(20, 5))
 
-        # [NEW] Dynamic VRAM Check & Filter
+        # Dynamic VRAM Check & Filter
         # 1. Get Total VRAM (or System RAM if CPU)
         max_available_gb = 0
         if torch.cuda.is_available():
@@ -1002,8 +1002,7 @@ class TTSApp(ctk.CTk):
             text_color="#F39C12"
         ).pack(side="top", pady=0)
 
-        # Line 2: Combined Credits (The "Legal Shield")
-        # Linking your name and the licenses in one tight line
+        # Line 2: Combined Credits
         ctk.CTkLabel(
             notice_frame,
             text="Copyright © 2026 CyberChief\n"
@@ -1111,7 +1110,7 @@ class TTSApp(ctk.CTk):
         self.after(0, lambda: func(*args, **kwargs))
 
     def check_ram_usage(self):
-        # [FIX] GPU VRAM Check
+        # GPU VRAM Check
         if torch.cuda.is_available():
             # Get reserved memory (memory allocated by caching allocator)
             reserved = torch.cuda.memory_reserved(0)
@@ -1137,8 +1136,7 @@ class TTSApp(ctk.CTk):
             self.safe_update(self.status_label.configure,
                              text="Checking/Downloading XTTS Model... (This may take time)")
 
-            # [CHANGE] Use model_name to trigger auto-download
-            # This downloads to C:\Users\User\AppData\Local\tts\ or ~/.local/share/tts
+            # Use model_name to trigger auto-download
             self.tts = TTS(
                 model_name="tts_models/multilingual/multi-dataset/xtts_v2",
                 progress_bar=False
@@ -1147,7 +1145,6 @@ class TTSApp(ctk.CTk):
 
         if self.mms_model is None:
             self.safe_update(self.status_label.configure, text="Loading MMS (Romanian)...")
-            # [KEEP] This is already correct for auto-downloading!
             self.mms_tokenizer = AutoTokenizer.from_pretrained("facebook/mms-tts-ron")
             self.mms_model = VitsModel.from_pretrained("facebook/mms-tts-ron").to(DEVICE)
             print(f"MMS Model Loaded on {DEVICE}")
@@ -1222,7 +1219,7 @@ class TTSApp(ctk.CTk):
 
                 if not raw_text.strip(): continue
 
-                # [FIX] Check for Romanian Language to use MMS
+                # Check for the Romanian Language to use MMS
                 if block_target_lang == "ro":
                     try:
                         # MMS requires its own logic
@@ -1336,4 +1333,5 @@ class TTSApp(ctk.CTk):
 
 if __name__ == "__main__":
     app = TTSApp()
+
     app.mainloop()
