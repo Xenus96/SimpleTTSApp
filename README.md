@@ -1,4 +1,4 @@
-# SimpleTTSApp version 2.0
+# SimpleTTSApp version 2.0 (CPU-powered)
 
 <img width="1038" height="665" alt="Screenshot 2026-02-07 164316" src="https://github.com/user-attachments/assets/46b47d7c-5092-4c2c-900d-ab613ac8e4cc" />
 
